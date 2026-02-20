@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import { controller, httpGet, httpPost, httpPut, request, response, BaseHttpController } from 'inversify-express-utils';
 
-import { TYPES, authMiddleware, validateBody } from 'lib';
+import { TYPES, authMiddleware, validateBody, loginRateLimiter } from 'lib';
 import { UserService } from 'services/user-service';
 import { RegisterDto, LoginDto, RefreshDto, UpdateProfileDto } from './user.dto';
 
@@ -23,7 +23,7 @@ export class UserController extends BaseHttpController {
         }
     }
 
-    @httpPost('/login', validateBody(LoginDto))
+    @httpPost('/login', loginRateLimiter, validateBody(LoginDto))
     async login(@request() req: Request, @response() res: Response) {
         try {
             const { email, password } = req.body;
