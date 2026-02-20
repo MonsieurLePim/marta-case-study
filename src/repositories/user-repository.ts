@@ -26,19 +26,26 @@ export interface UserRepository {
 export class UserRepositoryImpl implements UserRepository {
     constructor(@inject(TYPES.DB) private dataSource: DataSource) {}
 
-    async findByEmail(_email: string): Promise<User | null> {
-        throw new Error('Not implemented');
+    async findByEmail(email: string): Promise<User | null> {
+        return this.dataSource.getRepository(User).findOne({ where: { email } });
     }
 
-    async findById(_id: string): Promise<User | null> {
-        throw new Error('Not implemented');
+    async findById(id: string): Promise<User | null> {
+        return this.dataSource.getRepository(User).findOne({ where: { id } });
     }
 
-    async create(_userData: CreateUserDto): Promise<User> {
-        throw new Error('Not implemented');
+    async create(userData: CreateUserDto): Promise<User> {
+        const repo = this.dataSource.getRepository(User);
+        const user = repo.create(userData);
+        return repo.save(user);
     }
 
-    async update(_id: string, _userData: UpdateUserDto): Promise<User> {
-        throw new Error('Not implemented');
+    async update(id: string, userData: UpdateUserDto): Promise<User> {
+        const repo = this.dataSource.getRepository(User);
+        const user = await repo.findOne({ where: { id } });
+        if (!user) {
+            throw new Error(`User with id ${id} not found`);
+        }
+        return repo.save({ ...user, ...userData });
     }
 }
