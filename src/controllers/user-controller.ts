@@ -12,22 +12,46 @@ export class UserController extends BaseHttpController {
     }
 
     @httpPost('/register')
-    async register(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async register(@request() req: Request, @response() res: Response) {
+        try {
+            const user = await this.userService.register(req.body);
+            const { password: _, ...safeUser } = user as any;
+            return res.status(201).json(safeUser);
+        } catch (err: any) {
+            return res.status(400).json({ error: err.message });
+        }
     }
 
     @httpPost('/login')
-    async login(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async login(@request() req: Request, @response() res: Response) {
+        try {
+            const { email, password } = req.body;
+            const token = await this.userService.authenticate(email, password);
+            return res.status(200).json({ token });
+        } catch (err: any) {
+            return res.status(401).json({ error: err.message });
+        }
     }
 
     @httpGet('/profile', authMiddleware)
-    async getProfile(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async getProfile(@request() req: Request, @response() res: Response) {
+        try {
+            const user = await this.userService.getProfile(req.currentUser!.id);
+            const { password: _, ...safeUser } = user as any;
+            return res.status(200).json(safeUser);
+        } catch (err: any) {
+            return res.status(404).json({ error: err.message });
+        }
     }
 
     @httpPut('/profile', authMiddleware)
-    async updateProfile(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async updateProfile(@request() req: Request, @response() res: Response) {
+        try {
+            const user = await this.userService.updateProfile(req.currentUser!.id, req.body);
+            const { password: _, ...safeUser } = user as any;
+            return res.status(200).json(safeUser);
+        } catch (err: any) {
+            return res.status(400).json({ error: err.message });
+        }
     }
 }
