@@ -30,7 +30,9 @@ describe('UserRepository', () => {
             const result = await repository.findByEmail('test@test.com');
 
             expect(result).toEqual(user);
-            expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { email: 'test@test.com' } });
+            expect(mockRepo.findOne).toHaveBeenCalledWith({
+                where: { email: 'test@test.com' },
+            });
         });
 
         it('should return null when not found', async () => {

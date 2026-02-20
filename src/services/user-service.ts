@@ -36,7 +36,8 @@ export interface UserService {
 export class UserServiceImpl implements UserService {
     constructor(
         @inject(TYPES.UserRepository) private userRepository: UserRepository,
-        @inject(TYPES.PasswordManagerService) private passwordManager: PasswordManagerService,
+        @inject(TYPES.PasswordManagerService)
+        private passwordManager: PasswordManagerService,
     ) {}
 
     async register(userData: RegisterUserDto): Promise<User> {
@@ -45,7 +46,10 @@ export class UserServiceImpl implements UserService {
             throw new Error('Email already in use');
         }
         const hashedPassword = await this.passwordManager.toHash(userData.password);
-        return this.userRepository.create({ ...userData, password: hashedPassword });
+        return this.userRepository.create({
+            ...userData,
+            password: hashedPassword,
+        });
     }
 
     async authenticate(email: string, password: string): Promise<AuthTokens> {
@@ -68,7 +72,10 @@ export class UserServiceImpl implements UserService {
     }
 
     async refresh(token: string): Promise<string> {
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { id: string; email: string };
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+            id: string;
+            email: string;
+        };
         const user = await this.userRepository.findById(decoded.id);
         if (!user) {
             throw new Error('User not found');

@@ -16,8 +16,10 @@ const JWT_SECRET = 'test-secret';
 const buildApp = (mockUserService: jest.Mocked<UserService>) => {
     const container = new Container();
     container.bind<UserService>(TYPES.UserService).toConstantValue(mockUserService);
-    const server = new InversifyExpressServer(container, null, { rootPath: ROOT });
-    server.setConfig(app => app.use(json()));
+    const server = new InversifyExpressServer(container, null, {
+        rootPath: ROOT,
+    });
+    server.setConfig((app) => app.use(json()));
     return server.build();
 };
 
@@ -40,7 +42,12 @@ describe('UserController', () => {
     });
 
     describe('POST /users/register', () => {
-        const dto = { email: 'test@test.com', password: 'Password1', firstName: 'John', lastName: 'Doe' };
+        const dto = {
+            email: 'test@test.com',
+            password: 'Password1',
+            firstName: 'John',
+            lastName: 'Doe',
+        };
 
         it('should return 400 for an invalid email', async () => {
             const res = await request(buildApp(mockUserService))
@@ -79,24 +86,28 @@ describe('UserController', () => {
         });
 
         it('should return 201 with user data (no password) on success', async () => {
-            const user = { id: 'user-1', ...dto, createdAt: new Date(), updatedAt: new Date() } as User;
+            const user = {
+                id: 'user-1',
+                ...dto,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            } as User;
             mockUserService.register.mockResolvedValue(user);
 
-            const res = await request(buildApp(mockUserService))
-                .post(`${ROOT}/users/register`)
-                .send(dto);
+            const res = await request(buildApp(mockUserService)).post(`${ROOT}/users/register`).send(dto);
 
             expect(res.status).toBe(201);
-            expect(res.body).toMatchObject({ email: 'test@test.com', firstName: 'John' });
+            expect(res.body).toMatchObject({
+                email: 'test@test.com',
+                firstName: 'John',
+            });
             expect(res.body.password).toBeUndefined();
         });
 
         it('should return 400 when email is already taken', async () => {
             mockUserService.register.mockRejectedValue(new Error('Email already in use'));
 
-            const res = await request(buildApp(mockUserService))
-                .post(`${ROOT}/users/register`)
-                .send(dto);
+            const res = await request(buildApp(mockUserService)).post(`${ROOT}/users/register`).send(dto);
 
             expect(res.status).toBe(400);
         });
@@ -112,7 +123,10 @@ describe('UserController', () => {
             expect(mockUserService.authenticate).not.toHaveBeenCalled();
         });
         it('should return 200 with accessToken and refreshToken on valid credentials', async () => {
-            mockUserService.authenticate.mockResolvedValue({ accessToken: 'access', refreshToken: 'refresh' });
+            mockUserService.authenticate.mockResolvedValue({
+                accessToken: 'access',
+                refreshToken: 'refresh',
+            });
 
             const res = await request(buildApp(mockUserService))
                 .post(`${ROOT}/users/login`)
@@ -157,9 +171,7 @@ describe('UserController', () => {
         });
 
         it('should return 400 when refreshToken field is missing', async () => {
-            const res = await request(buildApp(mockUserService))
-                .post(`${ROOT}/users/refresh`)
-                .send({});
+            const res = await request(buildApp(mockUserService)).post(`${ROOT}/users/refresh`).send({});
 
             expect(res.status).toBe(400);
             expect(mockUserService.refresh).not.toHaveBeenCalled();
@@ -221,7 +233,12 @@ describe('UserController', () => {
 
     describe('GET /users/profile', () => {
         it('should return 200 with user profile when authenticated', async () => {
-            const user = { id: 'user-1', email: 'test@test.com', firstName: 'John', lastName: 'Doe' } as User;
+            const user = {
+                id: 'user-1',
+                email: 'test@test.com',
+                firstName: 'John',
+                lastName: 'Doe',
+            } as User;
             mockUserService.getProfile.mockResolvedValue(user);
 
             const res = await request(buildApp(mockUserService))
@@ -233,8 +250,7 @@ describe('UserController', () => {
         });
 
         it('should return 401 when not authenticated', async () => {
-            const res = await request(buildApp(mockUserService))
-                .get(`${ROOT}/users/profile`);
+            const res = await request(buildApp(mockUserService)).get(`${ROOT}/users/profile`);
 
             expect(res.status).toBe(401);
         });
@@ -242,7 +258,11 @@ describe('UserController', () => {
 
     describe('PUT /users/profile', () => {
         it('should return 200 with updated profile when authenticated', async () => {
-            const updated = { id: 'user-1', firstName: 'New', lastName: 'Name' } as User;
+            const updated = {
+                id: 'user-1',
+                firstName: 'New',
+                lastName: 'Name',
+            } as User;
             mockUserService.updateProfile.mockResolvedValue(updated);
 
             const res = await request(buildApp(mockUserService))
@@ -255,8 +275,7 @@ describe('UserController', () => {
         });
 
         it('should return 401 when not authenticated', async () => {
-            const res = await request(buildApp(mockUserService))
-                .put(`${ROOT}/users/profile`);
+            const res = await request(buildApp(mockUserService)).put(`${ROOT}/users/profile`);
 
             expect(res.status).toBe(401);
         });

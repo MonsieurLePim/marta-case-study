@@ -43,7 +43,9 @@ describe('authMiddleware', () => {
     });
 
     it('should return 401 when token is invalid', () => {
-        const req = { headers: { authorization: 'Bearer invalidtoken' } } as Request;
+        const req = {
+            headers: { authorization: 'Bearer invalidtoken' },
+        } as Request;
         const res = mockRes();
 
         authMiddleware(req, res, next);

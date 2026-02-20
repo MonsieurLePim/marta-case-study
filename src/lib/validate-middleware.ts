@@ -8,7 +8,7 @@ export const validateBody = (DtoClass: any) => {
         const errors = await validate(instance);
 
         if (errors.length > 0) {
-            const messages = errors.flatMap(e => Object.values(e.constraints || {}));
+            const messages = errors.flatMap((e) => Object.values(e.constraints || {}));
             res.status(400).json({ errors: messages });
             return;
         }

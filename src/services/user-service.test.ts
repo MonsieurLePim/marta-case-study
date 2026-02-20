@@ -45,14 +45,16 @@ describe('UserService', () => {
         it('should hash the password before saving', async () => {
             mockUserRepository.findByEmail.mockResolvedValue(null);
             mockPasswordManager.toHash.mockResolvedValue('hashed');
-            mockUserRepository.create.mockResolvedValue({ ...dto, id: '1', password: 'hashed' } as User);
+            mockUserRepository.create.mockResolvedValue({
+                ...dto,
+                id: '1',
+                password: 'hashed',
+            } as User);
 
             await service.register(dto);
 
             expect(mockPasswordManager.toHash).toHaveBeenCalledWith(dto.password);
-            expect(mockUserRepository.create).toHaveBeenCalledWith(
-                expect.objectContaining({ password: 'hashed' }),
-            );
+            expect(mockUserRepository.create).toHaveBeenCalledWith(expect.objectContaining({ password: 'hashed' }));
         });
 
         it('should return the created user', async () => {
@@ -68,7 +70,11 @@ describe('UserService', () => {
     });
 
     describe('authenticate', () => {
-        const user = { id: '1', email: 'test@test.com', password: 'hashed' } as User;
+        const user = {
+            id: '1',
+            email: 'test@test.com',
+            password: 'hashed',
+        } as User;
 
         it('should throw if user is not found', async () => {
             mockUserRepository.findByEmail.mockResolvedValue(null);
@@ -90,8 +96,12 @@ describe('UserService', () => {
             mockPasswordManager.compare.mockResolvedValue(true);
 
             const { accessToken, refreshToken } = await service.authenticate('test@test.com', 'Password1');
-            const decodedAccess = jwt.verify(accessToken, 'test-secret') as { id: string };
-            const decodedRefresh = jwt.verify(refreshToken, 'refresh-secret') as { id: string };
+            const decodedAccess = jwt.verify(accessToken, 'test-secret') as {
+                id: string;
+            };
+            const decodedRefresh = jwt.verify(refreshToken, 'refresh-secret') as {
+                id: string;
+            };
 
             expect(decodedAccess.id).toBe(user.id);
             expect(decodedRefresh.id).toBe(user.id);
@@ -99,7 +109,11 @@ describe('UserService', () => {
     });
 
     describe('refresh', () => {
-        const user = { id: '1', email: 'test@test.com', password: 'hashed' } as User;
+        const user = {
+            id: '1',
+            email: 'test@test.com',
+            password: 'hashed',
+        } as User;
 
         beforeEach(() => {
             process.env.JWT_REFRESH_SECRET = 'refresh-secret';

@@ -48,7 +48,9 @@ export class UserController extends BaseHttpController {
     async forgotPassword(@request() req: Request, @response() res: Response) {
         // Always return 200 regardless of whether email exists (prevents user enumeration)
         await this.userService.forgotPassword(req.body.email);
-        return res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
+        return res.status(200).json({
+            message: 'If that email is registered, a reset link has been sent.',
+        });
     }
 
     @httpPost('/reset-password', validateBody(ResetPasswordDto))

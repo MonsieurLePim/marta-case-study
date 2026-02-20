@@ -1,8 +1,4 @@
-import {
-    controller,
-    httpGet,
-    BaseHttpController,
-} from 'inversify-express-utils';
+import { controller, httpGet, BaseHttpController } from 'inversify-express-utils';
 
 @controller('/health-check')
 export abstract class BaseController extends BaseHttpController {

@@ -25,7 +25,7 @@ dotenv.config();
         });
         const swaggerDoc = parse(fs.readFileSync(path.join(__dirname, 'swagger.yaml'), 'utf8'));
 
-        app.setConfig(app => {
+        app.setConfig((app) => {
             app.use(json());
             // swagger-ui-express bundles its own @types/express, causing a type mismatch
             // with our project's version — cast to bypass the structural incompatibility.

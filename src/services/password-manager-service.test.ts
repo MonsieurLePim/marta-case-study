@@ -13,7 +13,7 @@ describe('PasswordManagerService', () => {
             const parts = result.split('.');
             expect(parts).toHaveLength(2);
             expect(parts[0]).toHaveLength(128); // 64 bytes hex
-            expect(parts[1]).toHaveLength(32);  // 16 bytes hex
+            expect(parts[1]).toHaveLength(32); // 16 bytes hex
         });
 
         it('should produce different hashes for the same password', async () => {
