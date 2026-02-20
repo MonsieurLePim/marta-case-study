@@ -1,38 +1,18 @@
-import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
-
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import { DataSource } from 'typeorm';
+import { User } from 'entities/user';
 
-const getParametersFromSSM = async () => {
-    try {
-        const ssmClient = new SSMClient({ region: 'eu-central-1' });
-
-        const input = {
-            Names: [
-                'k8s_rds_host',
-                'k8s_rds_db_name',
-                'k8s_rds_master_username',
-                'k8s_rds_master_password',
-            ],
-            WithDecryption: true,
-        };
-
-        const command = new GetParametersCommand(input);
-
-        const response = await ssmClient.send(command);
-
-        const envVars: any = {};
-
-        if (response.Parameters) {
-            for (const p of response.Parameters) {
-                envVars[p.Name!] = p.Value;
-            }
-        }
-
-        return envVars;
-    } catch (error: any) {
-        console.log('Failed to read parameters from SSM with error: ', error);
-    }
+// In production this service reads DB credentials from AWS SSM Parameter Store.
+// For local development, credentials are read from the .env file.
+export const getDataSource = (): DataSource => {
+    return new DataSource({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: Number(process.env.DATABASE_PORT),
+        database: process.env.DATABASE_NAME,
+        username: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD || undefined,
+        entities: [User],
+        synchronize: process.env.NODE_ENV !== 'production',
+        logging: false,
+    });
 };
-
-// Configuration for Datasource
