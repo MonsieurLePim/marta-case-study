@@ -35,8 +35,13 @@ export class UserController extends BaseHttpController {
     }
 
     @httpPost('/refresh', validateBody(RefreshDto))
-    async refresh(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async refresh(@request() req: Request, @response() res: Response) {
+        try {
+            const accessToken = await this.userService.refresh(req.body.refreshToken);
+            return res.status(200).json({ accessToken });
+        } catch (err: any) {
+            return res.status(401).json({ error: err.message });
+        }
     }
 
     @httpGet('/profile', authMiddleware)

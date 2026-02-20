@@ -46,12 +46,34 @@ export class UserServiceImpl implements UserService {
         return this.userRepository.create({ ...userData, password: hashedPassword });
     }
 
-    async authenticate(_email: string, _password: string): Promise<AuthTokens> {
-        throw new Error('Not implemented');
+    async authenticate(email: string, password: string): Promise<AuthTokens> {
+        const user = await this.userRepository.findByEmail(email);
+        if (!user) {
+            throw new Error('Invalid credentials');
+        }
+        const isMatch = await this.passwordManager.compare(user.password, password);
+        if (!isMatch) {
+            throw new Error('Invalid credentials');
+        }
+        const payload = { id: user.id, email: user.email };
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+            expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+        });
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
+            expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+        });
+        return { accessToken, refreshToken };
     }
 
-    async refresh(_token: string): Promise<string> {
-        throw new Error('Not implemented');
+    async refresh(token: string): Promise<string> {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { id: string; email: string };
+        const user = await this.userRepository.findById(decoded.id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET!, {
+            expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+        });
     }
 
     async getProfile(userId: string): Promise<User> {
