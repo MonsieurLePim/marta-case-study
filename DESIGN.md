@@ -25,7 +25,7 @@ All components are wired through an Inversify IoC container (`inversify.config.t
 
 ### Repository Pattern
 
-`UserRepository` is defined as an interface and injected into `UserService`. The implementation (`UserRepositoryImpl`) holds the only TypeORM reference in the data layer. This keeps ORM details out of business logic and makes the service unit-testable with a plain mock — no database needed.
+`UserRepository` is defined as an interface and injected into `UserService`. The implementation (`UserRepositoryImpl`) is the only place that knows about TypeORM. This decouples persistence details from business logic — the service works against a contract, not a specific ORM, which makes it unit-testable with a plain mock and straightforward to swap the storage layer without touching business rules.
 
 ---
 
@@ -50,11 +50,11 @@ The access token payload carries only `{ id, email }` — the minimum needed for
 
 ### Input Validation
 
-Every endpoint is guarded by `validateBody(DtoClass)` middleware (built with `class-validator` + `class-transformer`). Validation runs before the controller method executes, so invalid payloads are rejected with a structured `400` response and the service layer is never reached. Password strength rules (min 8 chars, one uppercase, one lowercase, one number) are enforced at the DTO level via `@Matches`.
+Every endpoint is guarded by a `validateBody` middleware that runs before the controller method. Invalid payloads are rejected at the boundary with a structured `400` response — the service layer is never reached with malformed data, keeping business logic free of defensive input checks. Password strength rules are enforced declaratively on the DTO, co-located with the shape they describe.
 
 ### Rate Limiting
 
-`POST /users/login` is protected by `express-rate-limit` (max 10 requests per 15 minutes per IP). The limiter is exported as a factory (`createLoginRateLimiter(max, windowMs)`) so tests can instantiate a lower-limit version without touching the production singleton, avoiding test-environment side effects.
+`POST /users/login` is rate-limited (10 requests per 15 minutes per IP) to mitigate brute-force and credential-stuffing attacks. Only the login endpoint is limited — registration and token refresh have different threat profiles that don't warrant the same restriction.
 
 ### User Enumeration Prevention
 
@@ -105,10 +105,8 @@ Tests are co-located with the implementation files they cover (`*.test.ts` next 
 
 **HTTP integration tests** (`user-controller`) — spin up a real Express app via `InversifyExpressServer` with a mock container binding, and send real HTTP requests using Supertest. These tests exercise routing, middleware ordering (auth, validation, rate limiting), status codes, and response shapes. The `UserService` is mocked so they remain fast and deterministic without a database.
 
-**What is not covered:** full-stack integration tests against a real database. For that, `testcontainers` (ephemeral Postgres in Docker per test run) would be the approach — it was out of scope here but is the natural next step to give confidence that the repository queries and TypeORM mappings work correctly end-to-end.
+Tests were written stub-first against the interface contract before implementing, ensuring the test suite reflects requirements rather than implementation details.
 
-### TDD Approach
-
-Each component was built in two commits: a stub + failing tests first, then the implementation to make them green. This ensured the tests were written against the interface contract, not the implementation.
+**What is not covered:** full-stack integration tests against a real database. `testcontainers` (ephemeral Postgres per test run) would be the natural next step to verify repository queries and TypeORM mappings end-to-end.
 
 ---
