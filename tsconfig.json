@@ -1,6 +1,14 @@
 {
     "compilerOptions": {
         "baseUrl": "./src",
+        "paths": {
+            "entities/*": ["entities/*"],
+            "services/*": ["services/*"],
+            "repositories/*": ["repositories/*"],
+            "controllers/*": ["controllers/*"],
+            "lib": ["lib/index.ts"],
+            "lib/*": ["lib/*"]
+        },
         "outDir": "./dist",
         "sourceMap": true,
         "noImplicitAny": false,
