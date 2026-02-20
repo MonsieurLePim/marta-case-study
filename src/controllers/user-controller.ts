@@ -4,7 +4,7 @@ import { controller, httpGet, httpPost, httpPut, request, response, BaseHttpCont
 
 import { TYPES, authMiddleware, validateBody } from 'lib';
 import { UserService } from 'services/user-service';
-import { RegisterDto, LoginDto, UpdateProfileDto } from './user.dto';
+import { RegisterDto, LoginDto, RefreshDto, UpdateProfileDto } from './user.dto';
 
 @controller('/users')
 export class UserController extends BaseHttpController {
@@ -27,11 +27,16 @@ export class UserController extends BaseHttpController {
     async login(@request() req: Request, @response() res: Response) {
         try {
             const { email, password } = req.body;
-            const token = await this.userService.authenticate(email, password);
-            return res.status(200).json({ token });
+            const tokens = await this.userService.authenticate(email, password);
+            return res.status(200).json(tokens);
         } catch (err: any) {
             return res.status(401).json({ error: err.message });
         }
+    }
+
+    @httpPost('/refresh', validateBody(RefreshDto))
+    async refresh(@request() _req: Request, @response() res: Response) {
+        res.status(501).json({ error: 'Not implemented' });
     }
 
     @httpGet('/profile', authMiddleware)

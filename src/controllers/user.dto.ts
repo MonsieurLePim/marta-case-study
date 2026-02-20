@@ -26,6 +26,11 @@ export class LoginDto {
     password: string;
 }
 
+export class RefreshDto {
+    @IsString()
+    refreshToken: string;
+}
+
 export class UpdateProfileDto {
     @IsOptional()
     @IsString()

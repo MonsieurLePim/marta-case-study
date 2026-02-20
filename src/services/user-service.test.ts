@@ -83,14 +83,47 @@ describe('UserService', () => {
             await expect(service.authenticate('test@test.com', 'wrong')).rejects.toThrow();
         });
 
-        it('should return a signed JWT on valid credentials', async () => {
+        it('should return a signed accessToken and refreshToken on valid credentials', async () => {
+            process.env.JWT_REFRESH_SECRET = 'refresh-secret';
+            process.env.JWT_REFRESH_EXPIRES_IN = '7d';
             mockUserRepository.findByEmail.mockResolvedValue(user);
             mockPasswordManager.compare.mockResolvedValue(true);
 
-            const token = await service.authenticate('test@test.com', 'Password1');
-            const decoded = jwt.verify(token, 'test-secret') as { id: string };
+            const { accessToken, refreshToken } = await service.authenticate('test@test.com', 'Password1');
+            const decodedAccess = jwt.verify(accessToken, 'test-secret') as { id: string };
+            const decodedRefresh = jwt.verify(refreshToken, 'refresh-secret') as { id: string };
+
+            expect(decodedAccess.id).toBe(user.id);
+            expect(decodedRefresh.id).toBe(user.id);
+        });
+    });
+
+    describe('refresh', () => {
+        const user = { id: '1', email: 'test@test.com', password: 'hashed' } as User;
+
+        beforeEach(() => {
+            process.env.JWT_REFRESH_SECRET = 'refresh-secret';
+        });
+
+        it('should return a new accessToken for a valid refresh token', async () => {
+            const refreshToken = jwt.sign({ id: user.id, email: user.email }, 'refresh-secret');
+            mockUserRepository.findById.mockResolvedValue(user);
+
+            const accessToken = await service.refresh(refreshToken);
+            const decoded = jwt.verify(accessToken, 'test-secret') as { id: string };
 
             expect(decoded.id).toBe(user.id);
+        });
+
+        it('should throw for an invalid refresh token', async () => {
+            await expect(service.refresh('invalid-token')).rejects.toThrow();
+        });
+
+        it('should throw if user no longer exists', async () => {
+            const refreshToken = jwt.sign({ id: 'ghost', email: 'gone@test.com' }, 'refresh-secret');
+            mockUserRepository.findById.mockResolvedValue(null);
+
+            await expect(service.refresh(refreshToken)).rejects.toThrow();
         });
     });
 

@@ -17,9 +17,15 @@ export interface UpdateProfileDto {
     lastName?: string;
 }
 
+export interface AuthTokens {
+    accessToken: string;
+    refreshToken: string;
+}
+
 export interface UserService {
     register(userData: RegisterUserDto): Promise<User>;
-    authenticate(email: string, password: string): Promise<string>;
+    authenticate(email: string, password: string): Promise<AuthTokens>;
+    refresh(token: string): Promise<string>;
     getProfile(userId: string): Promise<User>;
     updateProfile(userId: string, data: UpdateProfileDto): Promise<User>;
 }
@@ -40,18 +46,12 @@ export class UserServiceImpl implements UserService {
         return this.userRepository.create({ ...userData, password: hashedPassword });
     }
 
-    async authenticate(email: string, password: string): Promise<string> {
-        const user = await this.userRepository.findByEmail(email);
-        if (!user) {
-            throw new Error('Invalid credentials');
-        }
-        const isMatch = await this.passwordManager.compare(user.password, password);
-        if (!isMatch) {
-            throw new Error('Invalid credentials');
-        }
-        const secret = process.env.JWT_SECRET!;
-        const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
-        return jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn } as jwt.SignOptions);
+    async authenticate(_email: string, _password: string): Promise<AuthTokens> {
+        throw new Error('Not implemented');
+    }
+
+    async refresh(_token: string): Promise<string> {
+        throw new Error('Not implemented');
     }
 
     async getProfile(userId: string): Promise<User> {

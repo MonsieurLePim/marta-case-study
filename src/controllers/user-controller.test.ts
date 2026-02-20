@@ -31,6 +31,7 @@ describe('UserController', () => {
         mockUserService = {
             register: jest.fn(),
             authenticate: jest.fn(),
+            refresh: jest.fn(),
             getProfile: jest.fn(),
             updateProfile: jest.fn(),
         };
@@ -108,15 +109,16 @@ describe('UserController', () => {
             expect(res.status).toBe(400);
             expect(mockUserService.authenticate).not.toHaveBeenCalled();
         });
-        it('should return 200 with token on valid credentials', async () => {
-            mockUserService.authenticate.mockResolvedValue('jwt-token');
+        it('should return 200 with accessToken and refreshToken on valid credentials', async () => {
+            mockUserService.authenticate.mockResolvedValue({ accessToken: 'access', refreshToken: 'refresh' });
 
             const res = await request(buildApp(mockUserService))
                 .post(`${ROOT}/users/login`)
                 .send({ email: 'test@test.com', password: 'Password1' });
 
             expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('token');
+            expect(res.body).toHaveProperty('accessToken');
+            expect(res.body).toHaveProperty('refreshToken');
         });
 
         it('should return 401 on invalid credentials', async () => {
@@ -127,6 +129,38 @@ describe('UserController', () => {
                 .send({ email: 'test@test.com', password: 'wrong' });
 
             expect(res.status).toBe(401);
+        });
+    });
+
+    describe('POST /users/refresh', () => {
+        it('should return 200 with a new accessToken for a valid refresh token', async () => {
+            mockUserService.refresh.mockResolvedValue('new-access-token');
+
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/refresh`)
+                .send({ refreshToken: 'valid-refresh-token' });
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('accessToken');
+        });
+
+        it('should return 401 for an invalid refresh token', async () => {
+            mockUserService.refresh.mockRejectedValue(new Error('Invalid token'));
+
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/refresh`)
+                .send({ refreshToken: 'bad-token' });
+
+            expect(res.status).toBe(401);
+        });
+
+        it('should return 400 when refreshToken field is missing', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/refresh`)
+                .send({});
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.refresh).not.toHaveBeenCalled();
         });
     });
 
