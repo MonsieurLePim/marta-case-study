@@ -4,7 +4,7 @@ import { controller, httpGet, httpPost, httpPut, request, response, BaseHttpCont
 
 import { TYPES, authMiddleware, validateBody, loginRateLimiter } from 'lib';
 import { UserService } from 'services/user-service';
-import { RegisterDto, LoginDto, RefreshDto, UpdateProfileDto } from './user.dto';
+import { RegisterDto, LoginDto, RefreshDto, ForgotPasswordDto, ResetPasswordDto, UpdateProfileDto } from './user.dto';
 
 @controller('/users')
 export class UserController extends BaseHttpController {
@@ -42,6 +42,16 @@ export class UserController extends BaseHttpController {
         } catch (err: any) {
             return res.status(401).json({ error: err.message });
         }
+    }
+
+    @httpPost('/forgot-password', validateBody(ForgotPasswordDto))
+    async forgotPassword(@request() _req: Request, @response() res: Response) {
+        res.status(501).json({ error: 'Not implemented' });
+    }
+
+    @httpPost('/reset-password', validateBody(ResetPasswordDto))
+    async resetPassword(@request() _req: Request, @response() res: Response) {
+        res.status(501).json({ error: 'Not implemented' });
     }
 
     @httpGet('/profile', authMiddleware)

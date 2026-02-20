@@ -34,6 +34,8 @@ describe('UserController', () => {
             refresh: jest.fn(),
             getProfile: jest.fn(),
             updateProfile: jest.fn(),
+            forgotPassword: jest.fn(),
+            resetPassword: jest.fn(),
         };
     });
 
@@ -161,6 +163,59 @@ describe('UserController', () => {
 
             expect(res.status).toBe(400);
             expect(mockUserService.refresh).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('POST /users/forgot-password', () => {
+        it('should return 200 regardless of whether the email exists', async () => {
+            mockUserService.forgotPassword.mockResolvedValue(undefined);
+
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/forgot-password`)
+                .send({ email: 'anyone@test.com' });
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('message');
+        });
+
+        it('should return 400 for an invalid email', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/forgot-password`)
+                .send({ email: 'not-an-email' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.forgotPassword).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('POST /users/reset-password', () => {
+        it('should return 200 on a valid request', async () => {
+            mockUserService.resetPassword.mockResolvedValue(undefined);
+
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/reset-password`)
+                .send({ token: 'some-token', newPassword: 'NewPassword1' });
+
+            expect(res.status).toBe(200);
+        });
+
+        it('should return 400 for an invalid new password', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/reset-password`)
+                .send({ token: 'some-token', newPassword: 'weak' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.resetPassword).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 for an invalid or expired token', async () => {
+            mockUserService.resetPassword.mockRejectedValue(new Error('Invalid or expired token'));
+
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/reset-password`)
+                .send({ token: 'bad-token', newPassword: 'NewPassword1' });
+
+            expect(res.status).toBe(400);
         });
     });
 

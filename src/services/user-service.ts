@@ -28,6 +28,8 @@ export interface UserService {
     refresh(token: string): Promise<string>;
     getProfile(userId: string): Promise<User>;
     updateProfile(userId: string, data: UpdateProfileDto): Promise<User>;
+    forgotPassword(email: string): Promise<void>;
+    resetPassword(token: string, newPassword: string): Promise<void>;
 }
 
 @injectable()
@@ -86,5 +88,13 @@ export class UserServiceImpl implements UserService {
 
     async updateProfile(userId: string, data: UpdateProfileDto): Promise<User> {
         return this.userRepository.update(userId, data);
+    }
+
+    async forgotPassword(_email: string): Promise<void> {
+        throw new Error('Not implemented');
+    }
+
+    async resetPassword(_token: string, _newPassword: string): Promise<void> {
+        throw new Error('Not implemented');
     }
 }
