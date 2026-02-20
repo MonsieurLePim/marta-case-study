@@ -2,9 +2,10 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "forceExit": true,
+    "testTimeout": 60000,
     "setupFiles": ["reflect-metadata"],
     "roots": ["<rootDir>/src"],
-    "testMatch": ["**/*.test.ts", "!**/*.e2e.test.ts"],
+    "testMatch": ["**/*.e2e.test.ts"],
     "moduleDirectories": ["node_modules", "src"],
     "moduleNameMapper": {
         "^controllers/(.*)$": "<rootDir>/src/controllers/$1",
