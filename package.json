@@ -10,7 +10,7 @@
     "dev:build": "tsc -w",
     "dev:start": "nodemon ./dist/src/index.js",
     "dev": "concurrently npm:dev:*",
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && tsc && cp src/swagger.yaml dist/src/swagger.yaml",
     "start": "node ./dist/src/index.js",
     "test": "jest -c ./jest.config.json",
     "test:watch": "jest -c ./jest.config.json --watchAll=true"
@@ -21,6 +21,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/module-alias": "^2.0.4",
     "@types/supertest": "^2.0.12",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "concurrently": "^7.6.0",
@@ -52,8 +53,10 @@
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.0",
+    "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.12",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "yaml": "^2.8.2"
   },
   "_moduleAliases": {
     "entities": "dist/src/entities",

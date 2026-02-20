@@ -1,8 +1,12 @@
 import 'module-alias/register';
 import 'reflect-metadata';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { json } from 'body-parser';
 import { InversifyExpressServer } from 'inversify-express-utils';
+import swaggerUi from 'swagger-ui-express';
+import { parse } from 'yaml';
 
 import { getDataSource } from './typeormconfig';
 import { diContainer } from '../inversify.config';
@@ -19,8 +23,11 @@ dotenv.config();
         const app = new InversifyExpressServer(diContainer, null, {
             rootPath: '/partner-app/api',
         });
+        const swaggerDoc = parse(fs.readFileSync(path.join(__dirname, 'swagger.yaml'), 'utf8'));
+
         app.setConfig(app => {
             app.use(json());
+            app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
         });
 
         const server = app.build();
