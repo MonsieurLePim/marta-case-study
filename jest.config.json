@@ -1,0 +1,24 @@
+{
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": ["**/*.test.ts"],
+    "moduleDirectories": ["node_modules", "src"],
+    "moduleNameMapper": {
+        "^controllers/(.*)$": "<rootDir>/src/controllers/$1",
+        "^services/(.*)$": "<rootDir>/src/services/$1",
+        "^repositories/(.*)$": "<rootDir>/src/repositories/$1",
+        "^entities/(.*)$": "<rootDir>/src/entities/$1",
+        "^lib/(.*)$": "<rootDir>/src/lib/$1",
+        "^lib$": "<rootDir>/src/lib/index.ts"
+    },
+    "transform": {
+        "^.+\\.ts$": ["ts-jest", {
+            "tsconfig": {
+                "experimentalDecorators": true,
+                "emitDecoratorMetadata": true,
+                "strict": true
+            }
+        }]
+    }
+}
