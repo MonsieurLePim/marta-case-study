@@ -27,7 +27,10 @@ dotenv.config();
 
         app.setConfig(app => {
             app.use(json());
-            app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+            // swagger-ui-express bundles its own @types/express, causing a type mismatch
+            // with our project's version — cast to bypass the structural incompatibility.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            app.use('/docs', ...(swaggerUi.serve as any[]), swaggerUi.setup(swaggerDoc) as any);
         });
 
         const server = app.build();
