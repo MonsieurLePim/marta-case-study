@@ -1,4 +1,6 @@
 .idea
+.env
 dist
 node_modules
 *.log
+docker-compose.yml

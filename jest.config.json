@@ -1,6 +1,7 @@
 {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "forceExit": true,
     "setupFiles": ["reflect-metadata"],
     "roots": ["<rootDir>/src"],
     "testMatch": ["**/*.test.ts"],
