@@ -7,10 +7,10 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "dev:build": "tsc -w",
+    "dev:build": "tsc -p tsconfig.build.json -w",
     "dev:start": "nodemon ./dist/src/index.js",
     "dev": "concurrently npm:dev:*",
-    "build": "rimraf ./dist && tsc && cp src/swagger.yaml dist/src/swagger.yaml",
+    "build": "rimraf ./dist && tsc -p tsconfig.build.json && cp src/swagger.yaml dist/src/swagger.yaml",
     "start": "node ./dist/src/index.js",
     "test": "jest -c ./jest.config.json",
     "test:watch": "jest -c ./jest.config.json --watchAll=true",
