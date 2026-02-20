@@ -112,14 +112,3 @@ Tests are co-located with the implementation files they cover (`*.test.ts` next 
 Each component was built in two commits: a stub + failing tests first, then the implementation to make them green. This ensured the tests were written against the interface contract, not the implementation.
 
 ---
-
-## Bonus Items Completed
-
-| Item | Notes |
-|---|---|
-| Refresh token mechanism | Separate secret, 7-day expiry, dedicated `/users/refresh` endpoint |
-| Rate limiting | Factory pattern for testability; 429 documented in Swagger |
-| Password reset flow | Endpoint structure, DTO validation, entity stubs, TODO comments for email/token infra |
-| Request validation | `class-validator` DTOs, structured error responses |
-| Docker Compose | Multi-stage Dockerfile, Postgres with healthcheck, env override pattern |
-| Swagger / OpenAPI | Full OpenAPI 3.0 spec, served at `/partner-app/api/docs` |
