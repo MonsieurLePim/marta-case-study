@@ -1,12 +1,10 @@
-// export const TYPES = {
-//     DB: Symbol.for('DB'),
-//     producer: Symbol.for('producer'),
+export const TYPES = {
+    DB: Symbol.for('DB'),
 
-//     // Services
-//     ExampleService: Symbol.for('ExampleService'),
-//     UserService: Symbol.for('UserService'),
-//     PasswordManagerService: Symbol.for('PasswordManagerService'),
+    // Services
+    UserService: Symbol.for('UserService'),
+    PasswordManagerService: Symbol.for('PasswordManagerService'),
 
-//     // Repositories
-//     UserRepository: Symbol.for('UserRepository'),
-// };
+    // Repositories
+    UserRepository: Symbol.for('UserRepository'),
+};
