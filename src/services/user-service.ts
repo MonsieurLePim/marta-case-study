@@ -91,10 +91,17 @@ export class UserServiceImpl implements UserService {
     }
 
     async forgotPassword(_email: string): Promise<void> {
-        throw new Error('Not implemented');
+        // TODO: find user by email (silently ignore if not found — no user enumeration)
+        // TODO: generate a cryptographically secure reset token (e.g. crypto.randomBytes(32).toString('hex'))
+        // TODO: store hashed token + expiry (e.g. 1 hour) against the user record in the DB
+        // TODO: send reset-password email via an email provider (e.g. SendGrid / SES) with a link containing the token
     }
 
     async resetPassword(_token: string, _newPassword: string): Promise<void> {
-        throw new Error('Not implemented');
+        // TODO: look up the hashed token in the DB and verify it matches
+        // TODO: check that the token has not expired
+        // TODO: hash the new password via PasswordManagerService.toHash()
+        // TODO: update the user's password in the DB
+        // TODO: invalidate (delete) the token so it cannot be reused
     }
 }

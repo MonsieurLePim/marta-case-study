@@ -45,13 +45,20 @@ export class UserController extends BaseHttpController {
     }
 
     @httpPost('/forgot-password', validateBody(ForgotPasswordDto))
-    async forgotPassword(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async forgotPassword(@request() req: Request, @response() res: Response) {
+        // Always return 200 regardless of whether email exists (prevents user enumeration)
+        await this.userService.forgotPassword(req.body.email);
+        return res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
     }
 
     @httpPost('/reset-password', validateBody(ResetPasswordDto))
-    async resetPassword(@request() _req: Request, @response() res: Response) {
-        res.status(501).json({ error: 'Not implemented' });
+    async resetPassword(@request() req: Request, @response() res: Response) {
+        try {
+            await this.userService.resetPassword(req.body.token, req.body.newPassword);
+            return res.status(200).json({ message: 'Password has been reset successfully.' });
+        } catch (err: any) {
+            return res.status(400).json({ error: err.message });
+        }
     }
 
     @httpGet('/profile', authMiddleware)
