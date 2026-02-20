@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import { controller, httpGet, httpPost, httpPut, request, response, BaseHttpController } from 'inversify-express-utils';
 
-import { TYPES, authMiddleware } from 'lib';
+import { TYPES, authMiddleware, validateBody } from 'lib';
 import { UserService } from 'services/user-service';
+import { RegisterDto, LoginDto, UpdateProfileDto } from './user.dto';
 
 @controller('/users')
 export class UserController extends BaseHttpController {
@@ -11,7 +12,7 @@ export class UserController extends BaseHttpController {
         super();
     }
 
-    @httpPost('/register')
+    @httpPost('/register', validateBody(RegisterDto))
     async register(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.register(req.body);
@@ -22,7 +23,7 @@ export class UserController extends BaseHttpController {
         }
     }
 
-    @httpPost('/login')
+    @httpPost('/login', validateBody(LoginDto))
     async login(@request() req: Request, @response() res: Response) {
         try {
             const { email, password } = req.body;
@@ -44,7 +45,7 @@ export class UserController extends BaseHttpController {
         }
     }
 
-    @httpPut('/profile', authMiddleware)
+    @httpPut('/profile', authMiddleware, validateBody(UpdateProfileDto))
     async updateProfile(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.updateProfile(req.currentUser!.id, req.body);

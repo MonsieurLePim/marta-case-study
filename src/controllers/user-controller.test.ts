@@ -39,6 +39,42 @@ describe('UserController', () => {
     describe('POST /users/register', () => {
         const dto = { email: 'test@test.com', password: 'Password1', firstName: 'John', lastName: 'Doe' };
 
+        it('should return 400 for an invalid email', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/register`)
+                .send({ ...dto, email: 'not-an-email' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.register).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 when password is too short', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/register`)
+                .send({ ...dto, password: 'Ab1' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.register).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 when password has no uppercase letter', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/register`)
+                .send({ ...dto, password: 'password1' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.register).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 when password has no number', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/register`)
+                .send({ ...dto, password: 'Passwordd' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.register).not.toHaveBeenCalled();
+        });
+
         it('should return 201 with user data (no password) on success', async () => {
             const user = { id: 'user-1', ...dto, createdAt: new Date(), updatedAt: new Date() } as User;
             mockUserService.register.mockResolvedValue(user);
@@ -64,6 +100,14 @@ describe('UserController', () => {
     });
 
     describe('POST /users/login', () => {
+        it('should return 400 for an invalid email', async () => {
+            const res = await request(buildApp(mockUserService))
+                .post(`${ROOT}/users/login`)
+                .send({ email: 'not-an-email', password: 'Password1' });
+
+            expect(res.status).toBe(400);
+            expect(mockUserService.authenticate).not.toHaveBeenCalled();
+        });
         it('should return 200 with token on valid credentials', async () => {
             mockUserService.authenticate.mockResolvedValue('jwt-token');
 
