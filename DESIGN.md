@@ -105,8 +105,8 @@ Tests are co-located with the implementation files they cover (`*.test.ts` next 
 
 **HTTP integration tests** (`user-controller`) — spin up a real Express app via `InversifyExpressServer` with a mock container binding, and send real HTTP requests using Supertest. These tests exercise routing, middleware ordering (auth, validation, rate limiting), status codes, and response shapes. The `UserService` is mocked so they remain fast and deterministic without a database.
 
-Tests were written stub-first against the interface contract before implementing, ensuring the test suite reflects requirements rather than implementation details.
+**Repository e2e tests** (`user-repository.e2e.test.ts`) — spin up an ephemeral Postgres container via testcontainers, apply the schema with TypeORM's `synchronize`, and run all repository operations against a real database. This gives confidence that queries, TypeORM mappings, and DB constraints (e.g. unique email) behave correctly. The container is created once per test run and the table is truncated between tests for isolation. Run with `yarn test:e2e`; requires Docker.
 
-**What is not covered:** full-stack integration tests against a real database. `testcontainers` (ephemeral Postgres per test run) would be the natural next step to verify repository queries and TypeORM mappings end-to-end.
+Tests were written stub-first against the interface contract before implementing, ensuring the test suite reflects requirements rather than implementation details.
 
 ---
