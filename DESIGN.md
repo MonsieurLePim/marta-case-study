@@ -48,6 +48,8 @@ Short-lived access tokens limit the window of exposure if a token is leaked. The
 
 The access token payload carries only `{ id, email }` — the minimum needed for the auth middleware to identify the user without an extra DB round-trip on every request.
 
+**Known limitation:** old access tokens are not invalidated when a new one is issued via refresh. A stolen access token remains usable until it expires. Mitigation options: token blacklisting (store revoked JTIs in Redis/DB), refresh token rotation with reuse detection, or shortening the access token TTL further. The 15-minute expiry is a pragmatic middle ground for now.
+
 ### Input Validation
 
 Every endpoint is guarded by a `validateBody` middleware that runs before the controller method. Invalid payloads are rejected at the boundary with a structured `400` response — the service layer is never reached with malformed data, keeping business logic free of defensive input checks. Password strength rules are enforced declaratively on the DTO, co-located with the shape they describe.

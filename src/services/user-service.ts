@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { User } from 'entities/user';
 import { UserRepository } from 'repositories/user-repository';
 import { PasswordManagerService } from './password-manager-service';
@@ -16,6 +16,8 @@ export interface UpdateProfileDto {
     firstName?: string;
     lastName?: string;
 }
+
+type JwtTokenPayload = { id: string; email: string };
 
 export interface AuthTokens {
     accessToken: string;
@@ -63,25 +65,22 @@ export class UserServiceImpl implements UserService {
         }
         const payload = { id: user.id, email: user.email };
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
-            expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+            expiresIn: (process.env.JWT_EXPIRES_IN ?? '15m') as SignOptions['expiresIn'],
         });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
-            expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+            expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as SignOptions['expiresIn'],
         });
         return { accessToken, refreshToken };
     }
 
     async refresh(token: string): Promise<string> {
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
-            id: string;
-            email: string;
-        };
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JwtTokenPayload;
         const user = await this.userRepository.findById(decoded.id);
         if (!user) {
             throw new Error('User not found');
         }
         return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET!, {
-            expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+            expiresIn: (process.env.JWT_EXPIRES_IN ?? '15m') as SignOptions['expiresIn'],
         });
     }
 

@@ -16,7 +16,7 @@ export class UserController extends BaseHttpController {
     async register(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.register(req.body);
-            const { password: _, ...safeUser } = user as any;
+            const { password: _, ...safeUser } = user;
             return res.status(201).json(safeUser);
         } catch (err: any) {
             return res.status(400).json({ error: err.message });
@@ -67,7 +67,7 @@ export class UserController extends BaseHttpController {
     async getProfile(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.getProfile(req.currentUser!.id);
-            const { password: _, ...safeUser } = user as any;
+            const { password: _, ...safeUser } = user;
             return res.status(200).json(safeUser);
         } catch (err: any) {
             return res.status(404).json({ error: err.message });
@@ -78,7 +78,7 @@ export class UserController extends BaseHttpController {
     async updateProfile(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.updateProfile(req.currentUser!.id, req.body);
-            const { password: _, ...safeUser } = user as any;
+            const { password: _, ...safeUser } = user;
             return res.status(200).json(safeUser);
         } catch (err: any) {
             return res.status(400).json({ error: err.message });

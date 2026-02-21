@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 
-export const createLoginRateLimiter = (max = 10, windowMs = 15 * 60 * 1000) => {
+export const createLoginRateLimiter = (max: number = 10, windowMs: number = 15 * 60 * 1000) => {
     return rateLimit({
         windowMs,
         max,

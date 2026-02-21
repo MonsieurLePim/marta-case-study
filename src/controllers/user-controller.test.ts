@@ -279,5 +279,18 @@ describe('UserController', () => {
 
             expect(res.status).toBe(401);
         });
+
+        it('should strip extra fields and only pass firstName and lastName to the service', async () => {
+            const updated = { id: 'user-1', firstName: 'New', lastName: 'Name' } as User;
+            mockUserService.updateProfile.mockResolvedValue(updated);
+
+            await request(buildApp(mockUserService))
+                .put(`${ROOT}/users/profile`)
+                .set('Authorization', `Bearer ${makeToken()}`)
+                .send({ firstName: 'New', lastName: 'Name', password: 'hacked', email: 'attacker@evil.com' });
+
+            const data = mockUserService.updateProfile.mock.calls[0][1];
+            expect(data).toEqual({ firstName: 'New', lastName: 'Name' });
+        });
     });
 });
