@@ -1,4 +1,38 @@
-# Design Decisions
+# Documentation & Design Decisions
+
+## How To Run
+
+### Option A: Full stack via Docker Compose (recommended)
+
+Builds and runs both the app and Postgres in containers. No local setup needed beyond Docker.
+
+```bash
+cp env.example .env        # fill in secrets before starting
+docker compose up --build
+```
+
+API: `http://localhost:9000/partner-app/api`
+Swagger UI: `http://localhost:9000/docs`
+
+### Option B: Local app + DB in Docker
+
+Faster dev loop — avoids rebuilding the image on every change.
+
+```bash
+cp env.example .env        # fill in JWT secrets
+docker compose up db       # starts Postgres only
+yarn install
+yarn dev
+```
+
+### Running Tests
+
+```bash
+yarn test          # unit + HTTP integration tests
+yarn test:e2e      # repository e2e tests — requires Docker
+```
+
+---
 
 ## Architecture
 
