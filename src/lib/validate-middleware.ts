@@ -4,7 +4,7 @@ import { plainToInstance } from 'class-transformer';
 
 export const validateBody = (DtoClass: any) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const instance = plainToInstance(DtoClass, req.body);
+        const instance = plainToInstance(DtoClass, req.body, { excludeExtraneousValues: true });
         const errors = await validate(instance);
 
         if (errors.length > 0) {
@@ -13,6 +13,7 @@ export const validateBody = (DtoClass: any) => {
             return;
         }
 
+        req.body = instance;
         next();
     };
 };

@@ -13,5 +13,5 @@ yarn-error.log*
 
 .vscode
 
-kubeconfig-k8s-cluster.DS_Store
+kubeconfig-k8s-cluster
 .DS_Store
