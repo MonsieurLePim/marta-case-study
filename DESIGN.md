@@ -82,6 +82,14 @@ Three entities cover the full feature set:
 
 ---
 
+## Known Limitations
+
+### Error Response Detail
+
+Controller catch blocks return `err.message` directly in the response body. In production this can leak internal details — TypeORM constraint messages expose column and table names, and JWT errors expose token state. The proper fix is a normalised error handler that maps known error types to safe messages and swallows the rest. Omitted here to keep the scope focused.
+
+---
+
 ## What Was Deferred and Why
 
 ### Password Reset Flow (structure only)

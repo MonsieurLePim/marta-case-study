@@ -263,6 +263,17 @@ describe('UserController', () => {
 
             expect(res.status).toBe(401);
         });
+
+        it('should return 404 when the user is not found', async () => {
+            mockUserService.getProfile.mockRejectedValue(new Error('User not found'));
+
+            const res = await request(buildApp(mockUserService))
+                .get(`${ROOT}/users/profile`)
+                .set('Authorization', `Bearer ${makeToken()}`);
+
+            expect(res.status).toBe(404);
+            expect(res.body).toHaveProperty('error');
+        });
     });
 
     describe('PUT /users/profile', () => {
@@ -287,6 +298,18 @@ describe('UserController', () => {
             const res = await request(buildApp(mockUserService)).put(`${ROOT}/users/profile`);
 
             expect(res.status).toBe(401);
+        });
+
+        it('should return 400 when the update fails', async () => {
+            mockUserService.updateProfile.mockRejectedValue(new Error('Update failed'));
+
+            const res = await request(buildApp(mockUserService))
+                .put(`${ROOT}/users/profile`)
+                .set('Authorization', `Bearer ${makeToken()}`)
+                .send({ firstName: 'New' });
+
+            expect(res.status).toBe(400);
+            expect(res.body).toHaveProperty('error');
         });
 
         it('should strip extra fields and only pass firstName and lastName to the service', async () => {
