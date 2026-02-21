@@ -74,7 +74,7 @@ export class UserServiceImpl implements UserService {
     }
 
     async refresh(token: string): Promise<string> {
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JwtTokenPayload;
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!, { algorithms: ['HS256'] }) as JwtTokenPayload;
         const user = await this.userRepository.findById(decoded.id);
         if (!user) {
             throw new Error('User not found');

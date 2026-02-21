@@ -14,6 +14,14 @@ import { TYPES } from './lib';
 
 dotenv.config();
 
+const REQUIRED_ENV_VARS = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'DATABASE_HOST', 'DATABASE_NAME', 'DATABASE_USER'] as const;
+for (const key of REQUIRED_ENV_VARS) {
+    if (!process.env[key]) {
+        console.error(`Missing required environment variable: ${key}`);
+        process.exit(1);
+    }
+}
+
 (async () => {
     try {
         const dataSource = getDataSource();

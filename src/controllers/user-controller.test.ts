@@ -5,6 +5,15 @@ import jwt from 'jsonwebtoken';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
 
+// Mock rate limiters as pass-throughs so controller tests are not affected by rate limiting.
+// Rate limiter behaviour is covered independently in rate-limit.test.ts.
+jest.mock('lib', () => ({
+    ...jest.requireActual('lib'),
+    loginRateLimiter: (_req: any, _res: any, next: any) => next(),
+    registerRateLimiter: (_req: any, _res: any, next: any) => next(),
+    forgotPasswordRateLimiter: (_req: any, _res: any, next: any) => next(),
+}));
+
 import { TYPES } from 'lib';
 import { UserService } from 'services/user-service';
 import { User } from 'entities/user';

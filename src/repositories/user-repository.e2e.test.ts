@@ -102,6 +102,21 @@ describe('UserRepository (e2e)', () => {
             expect(refetched?.firstName).toBe('Jane');
         });
 
+        it('should update both fields and return the complete user object', async () => {
+            const created = await seed();
+            const updated = await repository.update(created.id, { firstName: 'Jane', lastName: 'Smith' });
+
+            expect(updated.id).toBe(created.id);
+            expect(updated.email).toBe(created.email);
+            expect(updated.firstName).toBe('Jane');
+            expect(updated.lastName).toBe('Smith');
+            expect(updated.updatedAt).toBeInstanceOf(Date);
+
+            const refetched = await repository.findById(created.id);
+            expect(refetched?.firstName).toBe('Jane');
+            expect(refetched?.lastName).toBe('Smith');
+        });
+
         it('should throw when the user does not exist', async () => {
             await expect(
                 repository.update('00000000-0000-0000-0000-000000000000', { firstName: 'Jane' }),

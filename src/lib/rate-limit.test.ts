@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import express from 'express';
 import request from 'supertest';
-import { createLoginRateLimiter } from './rate-limit';
+import { createRateLimiter } from './rate-limit';
 
 const buildTestApp = () => {
-    const limiter = createLoginRateLimiter(3, 60000);
+    const limiter = createRateLimiter(3, 60000, 'Too many requests');
     const app = express();
     app.post('/test', limiter, (_req, res) => res.status(200).json({ ok: true }));
     return app;

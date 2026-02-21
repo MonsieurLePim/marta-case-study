@@ -1,4 +1,4 @@
-import { scrypt, randomBytes } from 'crypto';
+import { scrypt, randomBytes, timingSafeEqual } from 'crypto';
 import { injectable } from 'inversify';
 import { promisify } from 'util';
 
@@ -20,6 +20,6 @@ export class PasswordManagerServiceImpl implements PasswordManagerService {
     async compare(storedPassword: string, suppliedPassword: string): Promise<boolean> {
         const [hash, salt] = storedPassword.split('.');
         const suppliedHash = (await scryptAsync(suppliedPassword, salt, 64)) as Buffer;
-        return hash === suppliedHash.toString('hex');
+        return timingSafeEqual(Buffer.from(hash, 'hex'), suppliedHash);
     }
 }

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import { controller, httpGet, httpPost, httpPut, request, response, BaseHttpController } from 'inversify-express-utils';
 
-import { TYPES, authMiddleware, validateBody, loginRateLimiter } from 'lib';
+import { TYPES, authMiddleware, validateBody, loginRateLimiter, registerRateLimiter, forgotPasswordRateLimiter } from 'lib';
 import { UserService } from 'services/user-service';
 import { RegisterDto, LoginDto, RefreshDto, ForgotPasswordDto, ResetPasswordDto, UpdateProfileDto } from './user.dto';
 
@@ -12,7 +12,7 @@ export class UserController extends BaseHttpController {
         super();
     }
 
-    @httpPost('/register', validateBody(RegisterDto))
+    @httpPost('/register', registerRateLimiter, validateBody(RegisterDto))
     async register(@request() req: Request, @response() res: Response) {
         try {
             const user = await this.userService.register(req.body);
@@ -44,7 +44,7 @@ export class UserController extends BaseHttpController {
         }
     }
 
-    @httpPost('/forgot-password', validateBody(ForgotPasswordDto))
+    @httpPost('/forgot-password', forgotPasswordRateLimiter, validateBody(ForgotPasswordDto))
     async forgotPassword(@request() req: Request, @response() res: Response) {
         // Always return 200 regardless of whether email exists (prevents user enumeration)
         await this.userService.forgotPassword(req.body.email);
