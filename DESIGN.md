@@ -73,10 +73,12 @@ Passwords are hashed with **scrypt** (Node.js built-in `crypto.scrypt`) rather t
 
 Two tokens are issued on login:
 
-| Token | Algorithm | Expiry | Secret |
-|---|---|---|---|
-| Access token | HS256 | 15 minutes | `JWT_SECRET` |
-| Refresh token | HS256 | 7 days | `JWT_REFRESH_SECRET` |
+
+| Token         | Algorithm | Expiry     | Secret               |
+| ------------- | --------- | ---------- | -------------------- |
+| Access token  | HS256     | 15 minutes | `JWT_SECRET`         |
+| Refresh token | HS256     | 7 days     | `JWT_REFRESH_SECRET` |
+
 
 Short-lived access tokens limit the window of exposure if a token is leaked. The refresh token lets clients obtain new access tokens without re-authenticating, while the separate secret means a compromised `JWT_SECRET` does not affect refresh tokens.
 
@@ -86,11 +88,25 @@ The access token payload carries only `{ id, email }` — the minimum needed for
 
 ### Input Validation
 
-Every endpoint is guarded by a `validateBody` middleware that runs before the controller method. Invalid payloads are rejected at the boundary with a structured `400` response — the service layer is never reached with malformed data, keeping business logic free of defensive input checks. Password strength rules are enforced declaratively on the DTO, co-located with the shape they describe.
+Every endpoint is guarded by a `validateBody` middleware that runs before the controller method. It uses `class-transformer` to deserialise the raw request body into a typed DTO, then `class-validator` to run the decorator-based rules. Invalid payloads are rejected at the boundary with a structured `400` response — the service layer is never reached with malformed data, keeping business logic free of defensive input checks. Password strength rules are enforced declaratively on the DTO, co-located with the shape they describe.
+
+`plainToInstance` is called with `excludeExtraneousValues: true`, so any field not explicitly decorated with `@Expose()` is stripped before the controller is reached. This acts as allowlist-style input sanitisation — unknown or unexpected fields are silently dropped rather than passed through.
 
 ### Rate Limiting
 
-`POST /users/login` is rate-limited (10 requests per 15 minutes per IP) to mitigate brute-force and credential-stuffing attacks. Only the login endpoint is limited — registration and token refresh have different threat profiles that don't warrant the same restriction.
+Three sensitive endpoints are rate-limited per IP using `express-rate-limit`:
+
+
+| Endpoint                      | Limit       | Window     | Rationale                                            |
+| ----------------------------- | ----------- | ---------- | ---------------------------------------------------- |
+| `POST /users/login`           | 10 requests | 15 minutes | Mitigate brute-force and credential-stuffing attacks |
+| `POST /users/register`        | 5 requests  | 1 hour     | Prevent bulk account creation from a single IP       |
+| `POST /users/forgot-password` | 5 requests  | 1 hour     | Prevent password reset request spam                  |
+
+
+`POST /users/refresh` is not rate-limited — it requires a valid, signed refresh token, which is sufficient protection on its own.
+
+**Known limitation:** the limiter uses an in-memory store, so counters are not shared across multiple server instances. In a horizontally scaled deployment, a request could hit a different instance each time and bypass the limit. The fix is to swap in a Redis-backed store (e.g. `rate-limit-redis`), which `express-rate-limit` supports as a drop-in via its `store` option.
 
 ### User Enumeration Prevention
 
@@ -106,11 +122,11 @@ The `password` field is stripped from every user response via destructuring (`{ 
 
 Three entities cover the full feature set:
 
-**`User`** — core identity record. Stores the hashed password inline (no separate table needed given scrypt's salt-in-value format).
+`**User`** — core identity record. Stores the hashed password inline (no separate table needed given scrypt's salt-in-value format).
 
-**`RefreshToken`** — one row per active session. Required to support token revocation (logout, suspicious activity). Stores the token *hash* only — the raw token is held by the client. Has `revokedAt` timestamp for soft-revocation and `CASCADE` delete on user removal.
+`**RefreshToken**` — one row per active session. Required to support token revocation (logout, suspicious activity). Stores the token *hash* only — the raw token is held by the client. Has `revokedAt` timestamp for soft-revocation and `CASCADE` delete on user removal.
 
-**`PasswordResetToken`** — one row per reset request. Stores the token *hash* with an `expiresAt` and `usedAt` timestamp to enforce one-time use and expiry. `CASCADE` delete on user removal.
+`**PasswordResetToken*`* — one row per reset request. Stores the token *hash* with an `expiresAt` and `usedAt` timestamp to enforce one-time use and expiry. `CASCADE` delete on user removal.
 
 > **Note:** `RefreshToken` and `PasswordResetToken` are currently entity stubs. The DB schema is defined and will be created by TypeORM's `synchronize` mode, but the service methods that read/write them are stubbed with TODO comments (see below).
 
@@ -126,7 +142,7 @@ Controller catch blocks return `err.message` directly in the response body. In p
 
 ## What Was Deferred and Why
 
-### Password Reset Flow (structure only)
+### Password Reset Flow
 
 Completing the password reset flow requires two pieces of infrastructure that are out of scope for a standalone auth service:
 
@@ -154,3 +170,4 @@ Tests are co-located with the implementation files they cover (`*.test.ts` next 
 Tests were written stub-first against the interface contract before implementing, ensuring the test suite reflects requirements rather than implementation details.
 
 ---
+
